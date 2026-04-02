@@ -32,6 +32,13 @@ It can use the authenticated Fronius web API for setup assistance and battery co
 Copy contents of custom_components folder to your home-assistant config/custom_components folder.
 After reboot of Home-Assistant, this integration can be configured through the integration setup UI.
 
+## Multiple Inverters
+
+You can add multiple `fronius_modbus` config entries in Home Assistant for separate inverters.
+Entity and device identifiers are scoped per configured hub target so multiple inverters can coexist cleanly even when entries reuse the same display name.
+
+This follows the same multi-instance collision fix that was proposed earlier in redpomodoro/fronius_modbus and later reintroduced in PR #89.
+
 ## Inverter Setup
 
 ### Web API Assisted Setup

@@ -149,13 +149,14 @@ class Hub:
         self._port = port
         self._inverter_unit_id = inverter_unit_id
         self._meter_unit_ids = list(meter_unit_ids)
-        self._entity_prefix = f'{ENTITY_PREFIX}_{name.lower()}_'
+        normalized_host = host.lower().replace('.', '')
+        self._id = f"{name.lower()}_{normalized_host}_{int(port)}_{int(inverter_unit_id)}"
+        self._entity_prefix = f"{ENTITY_PREFIX}_{self._id}"
         self._config_entry: ConfigEntry | None = None
         self._auto_enable_modbus = auto_enable_modbus
         self._restrict_modbus_to_this_ip = restrict_modbus_to_this_ip
         self._webclient: FroniusWebClient | None = None
 
-        self._id = f'{name.lower()}_{host.lower().replace('.','')}'
         self.online = True
 
         self._client = FroniusModbusClient(host=host, port=port, inverter_unit_id=inverter_unit_id, meter_unit_ids=meter_unit_ids, timeout=max(3, (scan_interval - 1)))
@@ -867,8 +868,8 @@ class Hub:
     @property 
     def device_info_storage(self) -> dict:
         return {
-            "identifiers": {(DOMAIN, f'{self._name}_battery_storage')},
-            "name": f'{self._client.data.get('s_model')}',
+            "identifiers": {(DOMAIN, f"{self._id}_battery_storage")},
+            "name": self._client.data.get('s_model'),
             "manufacturer": self._client.data.get('s_manufacturer'),
             "model": self._client.data.get('s_model'),
             "serial_number": self._client.data.get('s_serial'),
@@ -877,8 +878,8 @@ class Hub:
     @property 
     def device_info_inverter(self) -> dict:
         return {
-            "identifiers": {(DOMAIN, f'{self._name}_inverter')},
-            "name": f'Fronius {self._client.data.get('i_model')}',
+            "identifiers": {(DOMAIN, f"{self._id}_inverter")},
+            "name": f"Fronius {self._client.data.get('i_model')}",
             "manufacturer": self._client.data.get('i_manufacturer'),
             "model": self._client.data.get('i_model'),
             "serial_number": self._client.data.get('i_serial'),
@@ -892,7 +893,7 @@ class Hub:
         except ValueError:
             meter_position = 1
         return {
-            "identifiers": {(DOMAIN, f'{self._name}_meter_{unit_id}')},
+            "identifiers": {(DOMAIN, f"{self._id}_meter_{unit_id}")},
             "name": f'Fronius {self._client.data.get(f"{prefix}model")} Meter {meter_position}',
             "manufacturer": self._client.data.get(f"{prefix}manufacturer"),
             "model": self._client.data.get(f"{prefix}model"),
