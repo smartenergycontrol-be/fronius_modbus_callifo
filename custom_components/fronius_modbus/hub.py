@@ -39,7 +39,8 @@ def _export_limit_summary(config: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(config, dict) or not config:
         return {"available": False}
 
-    active_power = config.get("exportLimits", {}).get("activePower", {})
+    export_limits = config.get("exportLimits", {})
+    active_power = export_limits.get("activePower", {}) if isinstance(export_limits, dict) else {}
     soft_limit = active_power.get("softLimit", {}) if isinstance(active_power, dict) else {}
     hard_limit = active_power.get("hardLimit", {}) if isinstance(active_power, dict) else {}
 
@@ -50,7 +51,7 @@ def _export_limit_summary(config: dict[str, Any] | None) -> dict[str, Any]:
         "soft_limit_w": soft_limit.get("powerLimit") if isinstance(soft_limit, dict) else None,
         "hard_limit_enabled": hard_limit.get("enabled") if isinstance(hard_limit, dict) else None,
         "hard_limit_w": hard_limit.get("powerLimit") if isinstance(hard_limit, dict) else None,
-        "fail_safe_enabled": config.get("failSafeModeEnabled"),
+        "fail_safe_enabled": export_limits.get("failSafeModeEnabled") if isinstance(export_limits, dict) else None,
     }
 
 WEB_API_DATA_KEYS = (
@@ -268,6 +269,7 @@ class Hub:
         self._battery_write_transition_until = 0.0
         self._battery_write_transition_warned = False
         self._delayed_web_refresh_task: asyncio.Task | None = None
+        self._last_export_limit_summary: dict[str, Any] | None = None
         self._last_good_load_w: float | None = None
         self._last_good_inverter_power_w: float | None = None
         self._consecutive_bad_load_polls = 0
@@ -895,7 +897,10 @@ class Hub:
             export_limit_config = await self._async_web_job(self._webclient.get_export_limit_config)
         else:
             export_limit_config = None
-        _LOGGER.debug("Export limit config from web API: %s", _export_limit_summary(export_limit_config))
+        export_limit_summary = _export_limit_summary(export_limit_config)
+        if export_limit_summary != self._last_export_limit_summary:
+            _LOGGER.debug("Export limit config from web API: %s", export_limit_summary)
+            self._last_export_limit_summary = export_limit_summary
         self.data["export_soft_limit"] = None
         if isinstance(export_limit_config, dict) and export_limit_config:
             soft = (

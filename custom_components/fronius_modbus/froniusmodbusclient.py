@@ -112,6 +112,7 @@ class FroniusModbusClient(ExtModbusClient):
         self._power_factor_enable_mask_until = 0.0
         self._load_inverter_sample_ts: float | None = None
         self._load_meter_sample_ts: dict[int, float] = {}
+        self._last_mppt_debug_summary: tuple[Any, ...] | None = None
         self.data = {}
         self.reset_storage_info()
 
@@ -1000,16 +1001,26 @@ class FroniusModbusClient(ExtModbusClient):
         self.data['mppt_visible_module_ids'] = pv_modules
         pv_values = [module_power.get(module_id) for module_id in pv_modules if self.is_numeric(module_power.get(module_id))]
         self.data['pv_power'] = round(sum(pv_values), 2) if pv_values else None
-        _LOGGER.debug(
-            "Parsed model 160 MPPT data: address=%s length=%s reported_count=%s visible_modules=%s storage_charge_module=%s storage_discharge_module=%s labels=%s",
+        mppt_debug_summary = (
             mppt_read_address,
             mppt_model_length,
             reported_module_count,
-            pv_modules,
+            tuple(pv_modules),
             storage_charge_module,
             storage_discharge_module,
-            module_labels,
         )
+        if mppt_debug_summary != self._last_mppt_debug_summary:
+            _LOGGER.debug(
+                "Parsed model 160 MPPT data: address=%s length=%s reported_count=%s visible_modules=%s storage_charge_module=%s storage_discharge_module=%s labels=%s",
+                mppt_read_address,
+                mppt_model_length,
+                reported_module_count,
+                pv_modules,
+                storage_charge_module,
+                storage_discharge_module,
+                module_labels,
+            )
+            self._last_mppt_debug_summary = mppt_debug_summary
 
         return True
 
