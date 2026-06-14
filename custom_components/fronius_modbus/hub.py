@@ -407,7 +407,7 @@ class Hub:
                     "Keeping existing smart meter unit ids for %s because PowerMeter payload parsing failed",
                     self._host,
                 )
-            elif isinstance(meter_info, dict):
+            elif isinstance(meter_info, dict) and meter_info.get("unit_ids"):
                 self._client.set_meter_unit_ids(
                     meter_info.get("unit_ids"),
                     primary_unit_id=meter_info.get("primary_unit_id"),
@@ -438,6 +438,11 @@ class Hub:
                         if unit_id <= 0 or location < 0:
                             continue
                         meter_locations[unit_id] = location
+            else:
+                _LOGGER.debug(
+                    "Keeping existing smart meter unit ids for %s because PowerMeter payload contained no usable meters",
+                    self._host,
+                )
         await self._client.init_data()
         for unit_id in self._client._meter_unit_ids:
             phase_count = meter_phase_counts.get(unit_id)
