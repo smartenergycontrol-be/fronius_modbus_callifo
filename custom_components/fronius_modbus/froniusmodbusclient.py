@@ -716,6 +716,7 @@ class FroniusModbusClient(ExtModbusClient):
 
         self._set_mapped('pv_connection', CONNECTION_STATUS_CONDENSED, raw['PVConn'], 'pv connection')
         self._set_mapped('storage_connection', CONNECTION_STATUS_CONDENSED, raw['StorConn'], 'storage connection')
+        self.storage_configured = raw['StorConn'] in {1, 3, 7}
         self._set_mapped('ecp_connection', ECP_CONNECTION_STATUS, raw['ECPConn'], 'electrical connection')
         self.data['inverter_controls'] = self.bitmask_to_string(raw['StActCtl'], INVERTER_CONTROLS, 'Normal')
         # Adjust the scaling factor because isolation resistance is provided
