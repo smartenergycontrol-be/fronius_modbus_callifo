@@ -640,7 +640,7 @@ class FroniusModbusClient(ExtModbusClient):
                 ('AphC', 3, 1, dt.UINT16), ('A_SF', 4, 1, dt.INT16), ('PPVphAB', 5, 1, dt.UINT16),
                 ('PPVphBC', 6, 1, dt.UINT16), ('PPVphCA', 7, 1, dt.UINT16), ('PhVphA', 8, 1, dt.UINT16),
                 ('PhVphB', 9, 1, dt.UINT16), ('PhVphC', 10, 1, dt.UINT16), ('V_SF', 11, 1, dt.INT16),
-                ('W', 12, 1, dt.INT16), ('W_SF', 13, 1, dt.INT16), ('Hz', 14, 1, dt.INT16),
+                ('W', 12, 1, dt.INT16), ('W_SF', 13, 1, dt.INT16), ('Hz', 14, 1, dt.UINT16),
                 ('Hz_SF', 15, 1, dt.INT16), ('VAr', 18, 1, dt.INT16), ('VAr_SF', 19, 1, dt.INT16),
                 ('WH', 22, 2, dt.UINT32), ('WH_SF', 24, 1, dt.INT16), ('St', 36, 1, dt.UINT16),
                 ('StVnd', 37, 1, dt.UINT16), ('EvtVnd2', 44, 2, dt.UINT32),
@@ -735,7 +735,7 @@ class FroniusModbusClient(ExtModbusClient):
         raw = self._decode_registers(
             regs,
             (
-                ('WMax', 0, 1, dt.UINT16), ('VRef', 1, 1, dt.UINT16), ('VRefOfs', 2, 1, dt.UINT16),
+                ('WMax', 0, 1, dt.UINT16), ('VRef', 1, 1, dt.UINT16), ('VRefOfs', 2, 1, dt.INT16),
                 ('WMax_SF', 20, 1, dt.INT16), ('VRef_SF', 21, 1, dt.INT16),
                 ('VRefOfs_SF', 22, 1, dt.INT16),
             ),
@@ -759,7 +759,7 @@ class FroniusModbusClient(ExtModbusClient):
             (
                 ('Conn', 2, 1, dt.UINT16), ('WMaxLim_Ena', 7, 1, dt.UINT16),
                 ('OutPFSet', 8, 1, dt.INT16), ('OutPFSet_Ena', 12, 1, dt.UINT16),
-                ('VArPct_Ena', 20, 1, dt.INT16), ('WMaxLimPct_SF', 21, 1, dt.INT16),
+                ('VArPct_Ena', 20, 1, dt.UINT16), ('WMaxLimPct_SF', 21, 1, dt.INT16),
                 ('OutPFSet_SF', 22, 1, dt.INT16),
             ),
         )
