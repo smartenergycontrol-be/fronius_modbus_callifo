@@ -704,7 +704,7 @@ class FroniusModbusClient(ExtModbusClient):
             (
                 ('PVConn', 0, 1, dt.UINT16), ('StorConn', 1, 1, dt.UINT16),
                 ('ECPConn', 2, 1, dt.UINT16), ('StActCtl', 33, 2, dt.UINT32),
-                ('Ris', 42, 1, dt.UINT16), ('Ris_SF', 43, 1, dt.UINT16),
+                ('Ris', 42, 1, dt.UINT16), ('Ris_SF', 43, 1, dt.INT16),
             ),
         )
 
