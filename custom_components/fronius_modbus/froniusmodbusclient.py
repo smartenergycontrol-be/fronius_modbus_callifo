@@ -600,7 +600,17 @@ class FroniusModbusClient(ExtModbusClient):
             # Re-evaluate MPPT channels after storage detection from nameplate data.
             await self.read_mppt_data()
 
-        _LOGGER.debug(f"Init done. data: {self.data}")
+        _LOGGER.debug(
+            "Initialized Fronius Modbus client for %s:%s: inverter_model=%s meter_unit_ids=%s storage_configured=%s storage_model_address=%s mppt_visible_modules=%s sunspec_model_count=%s",
+            self._host,
+            self._port,
+            self.data.get("i_model"),
+            self._meter_unit_ids,
+            self.storage_configured,
+            self.data.get("storage_model_address"),
+            self.data.get("mppt_visible_module_ids"),
+            self.data.get("sunspec_model_count"),
+        )
 
         return True
 
@@ -792,25 +802,25 @@ class FroniusModbusClient(ExtModbusClient):
         '''
 
         if key not in self.data:
-            _LOGGER.info(f"Initializing {key}={value}")
+            _LOGGER.debug("Initializing total-increasing guard for %s=%s", key, value)
             return value
         elif self.data[key] is None:
             # None is a invalid value for monotonically increasing data.
             # hopefully never happens
-            _LOGGER.info(f"Found initial {key}=None. Now using new value {value}")
+            _LOGGER.debug("Replacing initial None value for %s with %s", key, value)
             return value
         elif value is None:
-            _LOGGER.warn(f"Received implausible {key}={value}. Using previous plausible value {self.data[key]}")
+            _LOGGER.warning("Received implausible %s=%s. Using previous plausible value %s", key, value, self.data[key])
             return self.data[key]
         elif value < self.data[key]:
-            _LOGGER.warn(f"Received implausible (too small) {key}={value} < previous plausible value {self.data[key]}")
+            _LOGGER.warning("Received implausible %s=%s below previous plausible value %s", key, value, self.data[key])
             return self.data[key]
         elif value > self.data[key] + 100000:
             # we allow steps of 100 kWh. Usually, at a typicall rate every 10 seconds the steps should be far below.
             # However, when data transfer is not working for minutes or even an hour it could become relevant.
             # Also, wrong values are often by orders of magnitude to large, which should still be avoided by this check.
 
-            _LOGGER.warn(f"Received implausible (too large) {key}={value} >> previous plausible value {self.data[key]}")
+            _LOGGER.warning("Received implausible %s=%s above previous plausible value %s", key, value, self.data[key])
             return self.data[key]
         else:
             return value

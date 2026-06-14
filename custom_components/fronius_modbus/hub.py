@@ -34,6 +34,25 @@ _SOLAR_API_MINIMUM_VERSION = (1, 40, 7, 1)
 _SOLAR_API_MINIMUM_VERSION_TEXT = "1.40.7-1"
 _SOLAR_API_FIRMWARE_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-(\d+))?$")
 
+
+def _export_limit_summary(config: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(config, dict) or not config:
+        return {"available": False}
+
+    active_power = config.get("exportLimits", {}).get("activePower", {})
+    soft_limit = active_power.get("softLimit", {}) if isinstance(active_power, dict) else {}
+    hard_limit = active_power.get("hardLimit", {}) if isinstance(active_power, dict) else {}
+
+    return {
+        "available": True,
+        "active_power_activated": active_power.get("activated") if isinstance(active_power, dict) else None,
+        "soft_limit_enabled": soft_limit.get("enabled") if isinstance(soft_limit, dict) else None,
+        "soft_limit_w": soft_limit.get("powerLimit") if isinstance(soft_limit, dict) else None,
+        "hard_limit_enabled": hard_limit.get("enabled") if isinstance(hard_limit, dict) else None,
+        "hard_limit_w": hard_limit.get("powerLimit") if isinstance(hard_limit, dict) else None,
+        "fail_safe_enabled": config.get("failSafeModeEnabled"),
+    }
+
 WEB_API_DATA_KEYS = (
     "inverter_temperature",
     "api_modbus_mode",
@@ -876,7 +895,7 @@ class Hub:
             export_limit_config = await self._async_web_job(self._webclient.get_export_limit_config)
         else:
             export_limit_config = None
-        _LOGGER.debug("Export limit config from web API: %s", export_limit_config)
+        _LOGGER.debug("Export limit config from web API: %s", _export_limit_summary(export_limit_config))
         self.data["export_soft_limit"] = None
         if isinstance(export_limit_config, dict) and export_limit_config:
             soft = (
