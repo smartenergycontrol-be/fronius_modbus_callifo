@@ -58,7 +58,7 @@ class ExtModbusClient:
     
     async def _check_and_reconnect(self):
         if not self._client.connected:
-            _LOGGER.warning("Modbus client is not connected, reconnecting...", exc_info=True)
+            _LOGGER.debug("Modbus client is not connected, reconnecting...")
             return await self.connect()
         return self._client.connected
 
