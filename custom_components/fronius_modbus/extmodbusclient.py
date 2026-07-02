@@ -8,11 +8,15 @@ import asyncio
 
 from pymodbus.client import AsyncModbusTcpClient
 try:
-    # For newer pymodbus versions (3.9.x+)
-    from pymodbus.pdu.pdu import unpack_bitstring
+    # pymodbus >= 3.11 (HA 2026.7 ships 3.13.1) - moved to pdu.utils
+    from pymodbus.pdu.utils import unpack_bitstring
 except ImportError:
-    # For older pymodbus versions (3.8.x and below)
-    from pymodbus.utilities import unpack_bitstring
+    try:
+        # pymodbus 3.9.x / 3.10.x
+        from pymodbus.pdu.pdu import unpack_bitstring
+    except ImportError:
+        # pymodbus <= 3.8.x
+        from pymodbus.utilities import unpack_bitstring
 from pymodbus.exceptions import ModbusIOException, ConnectionException
 from pymodbus import ExceptionResponse
 
